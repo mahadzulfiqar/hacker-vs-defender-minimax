@@ -29,7 +29,7 @@ This project not only demonstrates **game logic and flow control** but also intr
 ## 🖥️ Installation  
 
 1. Clone this repository:  
-   git clone  =  https://github.com/mahadzulfiqar
+   git clone  =(https://github.com/mahadzulfiqar/hacker-vs-defender-minimax)
 2. Navigate into the folder:
    cd hacker-vs-defender
 3. Run the game:
@@ -71,6 +71,11 @@ Continue playing until one side wins 🎉
 
 
 
+
+
+
+live demo : 
+https://mahadzulfiqar.github.io/hacker-vs-defender-minimax/
 
 
 🚀 Future Improvements
