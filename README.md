@@ -47,15 +47,30 @@ Continue playing until one side wins 🎉
 
 
 📸 Screenshots
+
 🏠 Game Start
+
+
 ![start](https://github.com/user-attachments/assets/0baf2985-7827-4835-80f7-f70b9349815f)
 
+
+
 🔄 Mid Game 
+
+
+
 ![mid](https://github.com/user-attachments/assets/b7d57230-b846-4037-b4c0-9bb10850e935)
 
 
+
 ✅ Game End
+
+
+
 ![end](https://github.com/user-attachments/assets/924303e4-8f82-4470-b031-f0b0d3478342)
+
+
+
 
 
 🚀 Future Improvements
