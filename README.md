@@ -55,6 +55,15 @@ Continue playing until one side wins 🎉
 
 
 
+![round01 png](https://github.com/user-attachments/assets/4dc8288c-6241-40b9-ba7f-60c774614872)
+
+
+
+
+
+
+
+
 🔄 Mid Game 
 
 
@@ -63,11 +72,34 @@ Continue playing until one side wins 🎉
 
 
 
+
+![round02 png](https://github.com/user-attachments/assets/fc7bb6aa-7a8d-46a9-9b69-9d1aac9803f7)
+
+
+
+
+
+
+
+
+
+
 ✅ Game End
 
 
 
 ![end](https://github.com/user-attachments/assets/924303e4-8f82-4470-b031-f0b0d3478342)
+
+
+
+
+
+
+![round03 png](https://github.com/user-attachments/assets/dfd5192e-8d80-4c49-99c3-5b78ad82a1cb)
+
+
+
+
 
 
 
@@ -87,6 +119,15 @@ Add real-world cyber attack & defense scenarios
 Multiplayer mode (Hacker vs Defender online)
 
 Difficulty levels (Easy, Medium, Hard)
+
+
+
+![Python](https://img.shields.io/badge/Python-3.13-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+![Stars](https://img.shields.io/github/stars/mahadzulfiqar/hacker-vs-defender-minimax?style=social)
+![Repo Size](https://img.shields.io/github/repo-size/mahadzulfiqar/hacker-vs-defender-minimax)
+
 
 👨‍💻 Author
 Mahad Zulfiqar
