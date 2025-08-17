@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cybersecurity: Hacker vs Defender (Minimax)</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --card: #101722;
+      --accent-good: #21f3b5;
+      --accent-bad: #ff5b7c;
+      --accent-mid: #5bb2ff;
+      --text: #e6edf3;
+      --muted: #9fb3c8;
+      --glow: 0 0 24px rgba(33, 243, 181, 0.35);
+      --glow-bad: 0 0 24px rgba(255, 91, 124, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 80% -10%, #122035 0%, var(--bg) 60%);
+      color: var(--text);
+      font: 16px/1.4 system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      letter-spacing: 0.15px;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 24px auto;
+      padding: 16px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-size: 26px;
+      margin: 0;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, var(--accent-good), var(--accent-mid));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: var(--glow);
+    }
+    .byline { color: var(--muted); font-size: 13px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .pill {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 12px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; font-weight: 600;
+    }
+
+    .score {
+      font-size: 36px; font-weight: 900; letter-spacing: 1px;
+    }
+
+    .zones { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .zone-title { font-weight: 800; margin-bottom: 8px; }
+
+    .defense, .attack {
+      display: grid; gap: 10px;
+    }
+
+    button.action {
+      width: 100%;
+      text-align: left;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--text);
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.04s ease, box-shadow 0.2s ease, border-color 0.3s ease;
+    }
+    button.action:hover { transform: translateY(-1px); }
+    button.action.good { box-shadow: var(--glow); border-color: rgba(33,243,181,0.35); }
+    button.action.bad { box-shadow: var(--glow-bad); border-color: rgba(255,91,124,0.35); }
+    button.action:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(0.3); }
+
+    .desc { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+    .log {
+      height: 260px; overflow: auto; background: var(--card);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 10px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px;
+    }
+    .log .line { margin: 4px 0; }
+    .log .good { color: var(--accent-good); }
+    .log .bad { color: var(--accent-bad); }
+    .log .info { color: var(--muted); }
+
+    .controls { display: flex; gap: 10px; flex-wrap: wrap; }
+    .controls button {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px; cursor: pointer; font-weight: 700;
+    }
+
+    .badge { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.04); }
+
+    footer { margin-top: 18px; color: var(--muted); font-size: 12px; text-align: center; }
+    a { color: var(--accent-mid); text-decoration: none; }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Cybersecurity: Hacker vs Defender (Minimax)</h1>
+        <div class="byline">You defend. AI attacks using minimax and looks several moves ahead.</div>
+      </div>
+      <div class="controls">
+        <button id="btnReset">↻ Reset</button>
+        <button id="btnExplain">🧠 Explain AI Move</button>
+        <span class="badge" id="depthBadge">Depth: 4</span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="status">
+          <div class="pill"><span>Round</span> <span id="round" class="score">1</span></div>
+          <div class="pill"><span>Security</span> <span id="security" class="score">100</span></div>
+          <div class="pill"><span>Firewall</span> <span id="firewall" class="score">0</span></div>
+        </div>
+
+        <div class="zones" style="margin-top:16px;">
+          <div>
+            <div class="zone-title">🛡️ Your Defensive Actions</div>
+            <div class="defense" id="defenseZone"></div>
+          </div>
+          <div>
+            <div class="zone-title">💀 Hacker Actions (AI uses Minimax)</div>
+            <div class="attack" id="attackZone"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-weight:800;">Event Log</div>
+          <div class="badge" id="nodesBadge">Nodes: 0</div>
+        </div>
+        <div id="log" class="log" aria-live="polite"></div>
+        <div class="desc" style="margin-top:8px;">Win condition: Keep security above 0 after <b id="maxRoundsLabel">6</b> rounds. AI wins if it drops to 0.</div>
+      </section>
+    </div>
+
+    <footer>
+      Built with vanilla HTML/CSS/JS. No backend. Perfect for GitHub Pages.
+    </footer>
+  </div>
+
+  <script>
+    /*********************
+     * GAME CONFIG
+     *********************/
+    const MAX_ROUNDS = 6;
+    const DEFAULT_DEPTH = 4; // how far the AI looks ahead
+
+    const defenderActions = [
+      {
+        id: 'patch', label: 'Patch Vulnerability', css: 'good',
+        desc: '+12 security. Removes active vulnerability flag, reducing future exploits.',
+        apply: (s) => { const ns = cloneState(s); ns.security += 12; ns.hasVuln = false; return ns; }
+      },
+      {
+        id: 'closePort', label: 'Close Open Port', css: 'good',
+        desc: '+10 security. Lowers port exposure, weakening port exploits.',
+        apply: (s) => { const ns = cloneState(s); ns.security += 10; ns.openPorts = Math.max(0, ns.openPorts - 1); return ns; }
+      },
+      {
+        id: 'upgradeFw', label: 'Upgrade Firewall', css: 'good',
+        desc: '+15 security. Increases firewall level (0→2) to mitigate DDoS & brute-force.',
+        apply: (s) => { const ns = cloneState(s); ns.security += 15; ns.firewall = Math.min(2, ns.firewall + 1); return ns; }
+      },
+    ];
+
+    const hackerActions = [
+      {
+        id: 'exploit', label: 'Exploit Vulnerability', css: 'bad',
+        desc: '-22 if vulnerability exists, else -8.',
+        apply: (s) => { const ns = cloneState(s); const dmg = s.hasVuln ? 22 : 8; ns.security -= dmg; ns.hasVuln = false; return ns; }
+      },
+      {
+        id: 'phish', label: 'Spear-Phishing', css: 'bad',
+        desc: '-14 (social engineering).',
+        apply: (s) => { const ns = cloneState(s); ns.security -= 14; ns.hasVuln = true; return ns; }
+      },
+      {
+        id: 'ddos', label: 'DDoS / Brute Force', css: 'bad',
+        desc: 'Base -12, mitigated by firewall (-4 per level).',
+        apply: (s) => { const ns = cloneState(s); const mitig = 4 * s.firewall; ns.security -= Math.max(4, 12 - mitig); return ns; }
+      },
+      {
+        id: 'portExploit', label: 'Exploit Open Port', css: 'bad',
+        desc: '-6 per open port (min -6).',
+        apply: (s) => { const ns = cloneState(s); const dmg = Math.max(6, 6 * s.openPorts); ns.security -= dmg; ns.openPorts = Math.max(0, ns.openPorts - 1); return ns; }
+      },
+    ];
+
+    /*********************
+     * STATE + HELPERS
+     *********************/
+    function initialState() {
+      return { round: 1, security: 100, hasVuln: true, openPorts: 2, firewall: 0 };
+    }
+
+    function cloneState(s) { return { round: s.round, security: s.security, hasVuln: s.hasVuln, openPorts: s.openPorts, firewall: s.firewall }; }
+
+    function isTerminal(s) {
+      return s.security <= 0 || s.round > MAX_ROUNDS;
+    }
+
+    // Evaluation: lower security favors the hacker (maximizer). We center around 0 for readability.
+    function evaluate(s) {
+      if (s.security <= 0) return 1000; // hacker cracked it
+      if (s.round > MAX_ROUNDS) return - (s.security); // defender kept some security → better
+      return - (s.security) + (s.hasVuln ? 6 : 0) + (s.openPorts * 3) - (s.firewall * 4);
+    }
+
+    /*********************
+     * MINIMAX with pruning
+     *********************/
+    function minimax(state, depth, alpha, beta, isHackerTurn, nodes) {
+      nodes.count++;
+      if (depth === 0 || isTerminal(state)) {
+        return { score: evaluate(state), move: null };
+      }
+
+      if (isHackerTurn) {
+        // Hacker tries to maximize score
+        let best = { score: -Infinity, move: null };
+        for (const act of hackerActions) {
+          let ns = act.apply(state);
+          // only advance round after hacker moves (player + AI completed)
+          if (!isHackerTurn) ns.round++; // not needed here
+          // Next layer: defender turn
+          const res = minimax(ns, depth - 1, alpha, beta, false, nodes);
+          if (res.score > best.score) best = { score: res.score, move: act };
+          alpha = Math.max(alpha, res.score);
+          if (beta <= alpha) break; // prune
+        }
+        return best;
+      } else {
+        // Defender tries to minimize score (keep security high)
+        let best = { score: Infinity, move: null };
+        for (const act of defenderActions) {
+          let ns = act.apply(state);
+          const res = minimax(ns, depth - 1, alpha, beta, true, nodes);
+          if (res.score < best.score) best = { score: res.score, move: act };
+          beta = Math.min(beta, res.score);
+          if (beta <= alpha) break;
+        }
+        return best;
+      }
+    }
+
+    /*********************
+     * UI + GAME LOOP
+     *********************/
+    const defenseZone = document.getElementById('defenseZone');
+    const attackZone = document.getElementById('attackZone');
+    const logEl = document.getElementById('log');
+    const roundEl = document.getElementById('round');
+    const securityEl = document.getElementById('security');
+    const firewallEl = document.getElementById('firewall');
+    const nodesBadge = document.getElementById('nodesBadge');
+    const depthBadge = document.getElementById('depthBadge');
+
+    let state = initialState();
+    let lastSearch = { nodes: 0, depth: DEFAULT_DEPTH, best: null };
+
+    function renderActions() {
+      defenseZone.innerHTML = '';
+      defenderActions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = `action ${a.css}`;
+        btn.innerHTML = `<div style="font-weight:800;">${a.label}</div><div class="desc">${a.desc}</div>`;
+        btn.onclick = () => onDefenderMove(a);
+        defenseZone.appendChild(btn);
+      });
+
+      // Show hacker actions (read-only) to teach users
+      attackZone.innerHTML = '';
+      hackerActions.forEach(a => {
+        const btn = document.createElement('button');
+        btn.className = `action ${a.css}`;
+        btn.disabled = true;
+        btn.innerHTML = `<div style="font-weight:800;">${a.label}</div><div class="desc">${a.desc}</div>`;
+        attackZone.appendChild(btn);
+      });
+    }
+
+    function updateStatus() {
+      roundEl.textContent = state.round;
+      securityEl.textContent = Math.max(0, Math.round(state.security));
+      firewallEl.textContent = state.firewall;
+      nodesBadge.textContent = `Nodes: ${lastSearch.nodes}`;
+      depthBadge.textContent = `Depth: ${lastSearch.depth}`;
+    }
+
+    function log(msg, cls = 'info') {
+      const line = document.createElement('div');
+      line.className = `line ${cls}`;
+      line.textContent = msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setDefenderEnabled(enabled) {
+      [...defenseZone.querySelectorAll('button')].forEach(b => b.disabled = !enabled);
+    }
+
+    function onDefenderMove(action) {
+      if (isTerminal(state)) return;
+      const before = cloneState(state);
+      state = action.apply(state);
+      log(`Defender → ${action.label} (Sec: ${before.security} → ${state.security})`, 'good');
+      setDefenderEnabled(false);
+
+      // AI move (with a slight delay for drama)
+      setTimeout(() => {
+        const nodes = { count: 0 };
+        const best = minimax(state, DEFAULT_DEPTH, -Infinity, Infinity, true, nodes);
+        lastSearch = { nodes: nodes.count, depth: DEFAULT_DEPTH, best };
+        if (best.move) {
+          const pre = cloneState(state);
+          state = best.move.apply(state);
+          log(`Hacker (AI) → ${best.move.label} (Sec: ${pre.security} → ${state.security})`, 'bad');
+        } else {
+          log('AI could not find a move (terminal or depth=0).', 'info');
+        }
+
+        // End of round
+        state.round++;
+        updateStatus();
+        checkEnd();
+        setDefenderEnabled(true);
+      }, 350);
+
+      updateStatus();
+      checkEnd();
+    }
+
+    function checkEnd() {
+      if (state.security <= 0) {
+        endGame(false);
+        return true;
+      }
+      if (state.round > MAX_ROUNDS) {
+        endGame(true);
+        return true;
+      }
+      return false;
+    }
+
+    function endGame(defenderWins) {
+      setDefenderEnabled(false);
+      const msg = defenderWins ? '✅ You WIN! System survived the onslaught.' : '❌ You LOSE. Hacker breached the system.';
+      log(msg, defenderWins ? 'good' : 'bad');
+    }
+
+    function reset() {
+      state = initialState();
+      lastSearch = { nodes: 0, depth: DEFAULT_DEPTH, best: null };
+      logEl.innerHTML = '';
+      renderActions();
+      updateStatus();
+      setDefenderEnabled(true);
+      document.getElementById('maxRoundsLabel').textContent = MAX_ROUNDS;
+      log('New simulation started. Your move first.','info');
+    }
+
+    // Explain last AI choice in human terms
+    function explainLastMove() {
+      if (!lastSearch.best || !lastSearch.best.move) {
+        alert('No AI move to explain yet. Make a defensive move first.');
+        return;
+      }
+      const m = lastSearch.best.move;
+      const reasons = {
+        exploit: 'High value when a vulnerability is present. AI prefers it if you did not patch.',
+        phish: 'Creates a new vulnerability for future turns while doing steady damage.',
+        ddos: 'Consistent pressure; stronger if your firewall is weak.',
+        portExploit: 'Punishes many open ports and trims them down.',
+      };
+      alert(`AI chose: ${m.label}\n\nWhy: ${reasons[m.id] || 'Best evaluation from searching future outcomes.'}\n\nDepth searched: ${lastSearch.depth}\nNodes explored: ${lastSearch.nodes}`);
+    }
+
+    // Bind controls
+    document.getElementById('btnReset').addEventListener('click', reset);
+    document.getElementById('btnExplain').addEventListener('click', explainLastMove);
+
+    // Kickoff
+    renderActions();
+    reset();
+  </script>
+</body>
+</html>
