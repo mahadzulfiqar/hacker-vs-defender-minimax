@@ -29,7 +29,7 @@ This project not only demonstrates **game logic and flow control** but also intr
 ## 🖥️ Installation  
 
 1. Clone this repository:  
-   git clone https://github.com/Mahad TBA/hacker-vs-defender.git
+   git clone  =  https://github.com/mahadzulfiqar
 2. Navigate into the folder:
    cd hacker-vs-defender
 3. Run the game:
